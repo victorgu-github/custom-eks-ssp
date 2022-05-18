@@ -41,6 +41,22 @@ provider "helm" {
   }
 }
 
+data "aws_eks_addon_version" "latest" {
+  for_each = toset(["vpc-cni", "coredns"])
+
+  addon_name         = each.value
+  kubernetes_version = local.cluster_version
+  most_recent        = true
+}
+
+data "aws_eks_addon_version" "default" {
+  for_each = toset(["kube-proxy"])
+
+  addon_name         = each.value
+  kubernetes_version = local.cluster_version
+  most_recent        = false
+}
+
 locals {
   #---------------------------------------------------------------
   # ARGOCD ADD-ON APPLICATION
@@ -65,7 +81,8 @@ module "kubernetes-addons" {
   source = "../../terraform-aws-eks-blueprints/modules/kubernetes-addons"
 
   eks_cluster_id = var.eks_cluster_id
-
+  eks_worker_security_group_id = module.eks_blueprints.worker_node_security_group_id
+  auto_scaling_group_names     = module.eks_blueprints.self_managed_node_group_autoscaling_groups
   #---------------------------------------------------------------
   # ARGO CD ADD-ON
   #---------------------------------------------------------------
@@ -90,17 +107,85 @@ module "kubernetes-addons" {
   enable_vpa                          = true
 
  # EKS Addons
-  enable_amazon_eks_aws_ebs_csi_driver = true # default is false
-  #Optional
-  amazon_eks_aws_ebs_csi_driver_config = {
-    addon_name               = "aws-ebs-csi-driver"
-    addon_version            = "v1.6.0-eksbuild.1"
-    service_account          = "ebs-csi-controller-sa"
-    resolve_conflicts        = "OVERWRITE"
-    namespace                = "kube-system"
-    additional_iam_policies  = []
-    service_account_role_arn = ""
-    tags                     = {}
+  enable_amazon_eks_vpc_cni = true
+  amazon_eks_vpc_cni_config = {
+    addon_version     = data.aws_eks_addon_version.latest["vpc-cni"].version
+    resolve_conflicts = "OVERWRITE"
+  }
+
+  enable_amazon_eks_coredns = true
+  amazon_eks_coredns_config = {
+    addon_version     = data.aws_eks_addon_version.latest["coredns"].version
+    resolve_conflicts = "OVERWRITE"
+  }
+
+  enable_amazon_eks_kube_proxy = true
+  amazon_eks_kube_proxy_config = {
+    addon_version     = data.aws_eks_addon_version.default["kube-proxy"].version
+    resolve_conflicts = "OVERWRITE"
+  }
+
+  enable_amazon_eks_aws_ebs_csi_driver = true
+  
+    # Prometheus and Amazon Managed Prometheus integration
+  enable_prometheus                    = true
+  enable_amazon_prometheus             = true
+  amazon_prometheus_workspace_endpoint = module.eks_blueprints.amazon_prometheus_workspace_endpoint
+
+  enable_aws_for_fluentbit = true
+  aws_for_fluentbit_helm_config = {
+    name                                      = "aws-for-fluent-bit"
+    chart                                     = "aws-for-fluent-bit"
+    repository                                = "https://aws.github.io/eks-charts"
+    version                                   = "0.1.0"
+    namespace                                 = "logging"
+    aws_for_fluent_bit_cw_log_group           = "/${module.eks_blueprints.eks_cluster_id}/worker-fluentbit-logs" # Optional
+    aws_for_fluentbit_cwlog_retention_in_days = 90
+    create_namespace                          = true
+    values = [templatefile("${path.module}/helm_values/aws-for-fluentbit-values.yaml", {
+      region                          = local.region
+      aws_for_fluent_bit_cw_log_group = "/${module.eks_blueprints.eks_cluster_id}/worker-fluentbit-logs"
+    })]
+    set = [
+      {
+        name  = "nodeSelector.kubernetes\\.io/os"
+        value = "linux"
+      }
+    ]
+  }
+
+  enable_fargate_fluentbit = true
+  fargate_fluentbit_addon_config = {
+    output_conf = <<-EOF
+    [OUTPUT]
+      Name cloudwatch_logs
+      Match *
+      region ${local.region}
+      log_group_name /${module.eks_blueprints.eks_cluster_id}/fargate-fluentbit-logs
+      log_stream_prefix "fargate-logs-"
+      auto_create_group true
+    EOF
+
+    filters_conf = <<-EOF
+    [FILTER]
+      Name parser
+      Match *
+      Key_Name log
+      Parser regex
+      Preserve_Key True
+      Reserve_Data True
+    EOF
+
+    parsers_conf = <<-EOF
+    [PARSER]
+      Name regex
+      Format regex
+      Regex ^(?<time>[^ ]+) (?<stream>[^ ]+) (?<logtag>[^ ]+) (?<message>.+)$
+      Time_Key time
+      Time_Format %Y-%m-%dT%H:%M:%S.%L%z
+      Time_Keep On
+      Decode_Field_As json message
+    EOF
   }
 }
 
