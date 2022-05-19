@@ -15,10 +15,11 @@
  - Managed node group     https://aws-ia.github.io/terraform-aws-eks-blueprints/node-groups/#managed-node-groups
  - self managed node group
  - fargate_profiles
- - 
+ - enable AMP for next step
 3. ADD-ONS
  - EKS adds-on
  - Argo CD 
+ - AMP (/ at end in workspace url)
 
 # terraform instructions
 need to modify backend.conf and base.tfvars in each subfolder and make sure the variables are matched
@@ -43,4 +44,6 @@ need to modify backend.conf and base.tfvars in each subfolder and make sure the 
       manually add cluster id, region and amp_endpoint
 
 
-
+# known issues:
+1. affinity settings in some applications can only work on one node group. so better create node group with >3 nodes
+2. 

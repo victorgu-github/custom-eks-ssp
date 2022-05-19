@@ -28,5 +28,5 @@ output "configure_kubectl" {
 
 output "AMP_endpoint" {
   description = "AMP_endpoint"
-  value       = module.eks_blueprints.amazon_prometheus_workspace_endpoint
+  value       = module.eks-blueprints.amazon_prometheus_workspace_endpoint
 }
