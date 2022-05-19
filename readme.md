@@ -40,7 +40,7 @@ need to modify backend.conf and base.tfvars in each subfolder and make sure the 
       output: cluster_id, configure_kubectl
 
     2.3 Add-ons - Please refer to the [instructions](./add-ons/README.md) to deploy the add-ons to the private EKS cluster using GitOps.
-
+      manually add cluster id, region and amp_endpoint
 
 
 

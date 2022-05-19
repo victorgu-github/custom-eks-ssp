@@ -81,30 +81,18 @@ module "kubernetes-addons" {
   source = "../../terraform-aws-eks-blueprints/modules/kubernetes-addons"
 
   eks_cluster_id = var.eks_cluster_id
-  eks_worker_security_group_id = module.eks_blueprints.worker_node_security_group_id
-  auto_scaling_group_names     = module.eks_blueprints.self_managed_node_group_autoscaling_groups
+  # eks_worker_security_group_id = module.eks_blueprints.worker_node_security_group_id    # required by agones
+  # auto_scaling_group_names     = module.eks_blueprints.self_managed_node_group_autoscaling_groups  # required by aws_node_termination_handler
   #---------------------------------------------------------------
   # ARGO CD ADD-ON
   #---------------------------------------------------------------
 
   enable_argocd         = true
-  argocd_manage_add_ons = true # Indicates that ArgoCD is responsible for managing/deploying Add-ons.
+  argocd_manage_add_ons = false # Indicates that ArgoCD is responsible for managing/deploying Add-ons.
   argocd_applications = {
     addons    = local.addon_application
     workloads = local.workload_application
   }
-
-  #---------------------------------------------------------------
-  # ADD-ONS
-  #---------------------------------------------------------------
-
-  enable_aws_load_balancer_controller = true
-  enable_cert_manager                 = true
-  enable_cluster_autoscaler           = true
-  enable_karpenter                    = true
-  enable_keda                         = true
-  enable_metrics_server               = true
-  enable_vpa                          = true
 
  # EKS Addons
   enable_amazon_eks_vpc_cni = true
@@ -130,62 +118,62 @@ module "kubernetes-addons" {
     # Prometheus and Amazon Managed Prometheus integration
   enable_prometheus                    = true
   enable_amazon_prometheus             = true
-  amazon_prometheus_workspace_endpoint = module.eks_blueprints.amazon_prometheus_workspace_endpoint
+  amazon_prometheus_workspace_endpoint = var.amp_endpoint
 
-  enable_aws_for_fluentbit = true
-  aws_for_fluentbit_helm_config = {
-    name                                      = "aws-for-fluent-bit"
-    chart                                     = "aws-for-fluent-bit"
-    repository                                = "https://aws.github.io/eks-charts"
-    version                                   = "0.1.0"
-    namespace                                 = "logging"
-    aws_for_fluent_bit_cw_log_group           = "/${module.eks_blueprints.eks_cluster_id}/worker-fluentbit-logs" # Optional
-    aws_for_fluentbit_cwlog_retention_in_days = 90
-    create_namespace                          = true
-    values = [templatefile("${path.module}/helm_values/aws-for-fluentbit-values.yaml", {
-      region                          = local.region
-      aws_for_fluent_bit_cw_log_group = "/${module.eks_blueprints.eks_cluster_id}/worker-fluentbit-logs"
-    })]
-    set = [
-      {
-        name  = "nodeSelector.kubernetes\\.io/os"
-        value = "linux"
-      }
-    ]
-  }
+  # enable_aws_for_fluentbit = true
+  # aws_for_fluentbit_helm_config = {
+  #   name                                      = "aws-for-fluent-bit"
+  #   chart                                     = "aws-for-fluent-bit"
+  #   repository                                = "https://aws.github.io/eks-charts"
+  #   version                                   = "0.1.0"
+  #   namespace                                 = "logging"
+  #   aws_for_fluent_bit_cw_log_group           = "/${var.eks_cluster_id}/worker-fluentbit-logs" # Optional
+  #   aws_for_fluentbit_cwlog_retention_in_days = 90
+  #   create_namespace                          = true
+  #   values = [templatefile("${path.module}/helm_values/aws-for-fluentbit-values.yaml", {
+  #     region                          = local.region
+  #     aws_for_fluent_bit_cw_log_group = "/${var.eks_cluster_id}/worker-fluentbit-logs"
+  #   })]
+  #   set = [
+  #     {
+  #       name  = "nodeSelector.kubernetes\\.io/os"
+  #       value = "linux"
+  #     }
+  #   ]
+  # }
 
-  enable_fargate_fluentbit = true
-  fargate_fluentbit_addon_config = {
-    output_conf = <<-EOF
-    [OUTPUT]
-      Name cloudwatch_logs
-      Match *
-      region ${local.region}
-      log_group_name /${module.eks_blueprints.eks_cluster_id}/fargate-fluentbit-logs
-      log_stream_prefix "fargate-logs-"
-      auto_create_group true
-    EOF
+  # enable_fargate_fluentbit = true
+  # fargate_fluentbit_addon_config = {
+  #   output_conf = <<-EOF
+  #   [OUTPUT]
+  #     Name cloudwatch_logs
+  #     Match *
+  #     region ${local.region}
+  #     log_group_name /${var.eks_cluster_id}/fargate-fluentbit-logs
+  #     log_stream_prefix "fargate-logs-"
+  #     auto_create_group true
+  #   EOF
 
-    filters_conf = <<-EOF
-    [FILTER]
-      Name parser
-      Match *
-      Key_Name log
-      Parser regex
-      Preserve_Key True
-      Reserve_Data True
-    EOF
+  #   filters_conf = <<-EOF
+  #   [FILTER]
+  #     Name parser
+  #     Match *
+  #     Key_Name log
+  #     Parser regex
+  #     Preserve_Key True
+  #     Reserve_Data True
+  #   EOF
 
-    parsers_conf = <<-EOF
-    [PARSER]
-      Name regex
-      Format regex
-      Regex ^(?<time>[^ ]+) (?<stream>[^ ]+) (?<logtag>[^ ]+) (?<message>.+)$
-      Time_Key time
-      Time_Format %Y-%m-%dT%H:%M:%S.%L%z
-      Time_Keep On
-      Decode_Field_As json message
-    EOF
-  }
+  #   parsers_conf = <<-EOF
+  #   [PARSER]
+  #     Name regex
+  #     Format regex
+  #     Regex ^(?<time>[^ ]+) (?<stream>[^ ]+) (?<logtag>[^ ]+) (?<message>.+)$
+  #     Time_Key time
+  #     Time_Format %Y-%m-%dT%H:%M:%S.%L%z
+  #     Time_Keep On
+  #     Decode_Field_As json message
+  #   EOF
+  # }
 }
 
