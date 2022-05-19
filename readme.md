@@ -19,7 +19,7 @@
 3. ADD-ONS
  - EKS adds-on
  - Argo CD 
- - AMP (/ at end in workspace url)
+ - AMP (/ at end in workspace url) tf deploys irsa and workspace. argocd deploys promethus chart
 
 # terraform instructions
 need to modify backend.conf and base.tfvars in each subfolder and make sure the variables are matched
