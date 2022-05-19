@@ -20,6 +20,11 @@
  - EKS adds-on
  - Argo CD 
  - AMP (/ at end in workspace url) tf deploys irsa and workspace. argocd deploys promethus chart
+ - log with fluent bit
+       complete-kubernetes-addons goes to cloudwatch log
+       observability/amp-amg-opensearch goes to opensearch 
+
+4. optional. for add-ons not covered, you can get charts and check in your git repo for argocd. You may need to manaully create IRSA. 
 
 # terraform instructions
 need to modify backend.conf and base.tfvars in each subfolder and make sure the variables are matched
