@@ -75,6 +75,9 @@ locals {
   public_subnet_ids  = data.terraform_remote_state.vpc_s3_backend.outputs.public_subnets
 
   cluster_name = join("-", [local.tenant, local.environment, local.zone, "eks"])
+  
+  amazonlinux2eks = "amazon-eks-node-${var.cluster_version}-*"
+  bottlerocket    = "bottlerocket-aws-k8s-${var.cluster_version}-x86_64-*"
 }
 
 data "aws_ami" "eks" {
@@ -85,6 +88,24 @@ data "aws_ami" "eks" {
     name   = "name"
     values = ["amazon-eks-node-${local.kubernetes_version}-*"]
   }
+}
+
+data "aws_ami" "amazonlinux2eks" {
+  most_recent = true
+  filter {
+    name   = "name"
+    values = [local.amazonlinux2eks]
+  }
+  owners = ["amazon"]
+}
+
+data "aws_ami" "bottlerocket" {
+  most_recent = true
+  filter {
+    name   = "name"
+    values = [local.bottlerocket]
+  }
+  owners = ["amazon"]
 }
 
 module "eks-blueprints" {
@@ -102,6 +123,18 @@ module "eks-blueprints" {
   # Cluster Security Group
   cluster_additional_security_group_ids   = var.cluster_additional_security_group_ids
   cluster_security_group_additional_rules = var.cluster_security_group_additional_rules
+
+  # Allow Ingress rule for Worker node groups from Cluster Sec group for Karpenter
+  node_security_group_additional_rules = {
+    ingress_nodes_karpenter_port = {
+      description                   = "Cluster API to Nodegroup for Karpenter"
+      protocol                      = "tcp"
+      from_port                     = 8443
+      to_port                       = 8443
+      type                          = "ingress"
+      source_cluster_security_group = true
+    }
+  }
 
   # EKS CONTROL PLANE VARIABLES
   cluster_version = local.kubernetes_version
@@ -175,4 +208,44 @@ module "eks-blueprints" {
 
     # AWS Managed Services
   enable_amazon_prometheus = true
+}
+
+
+# Creates Launch templates for Karpenter. 
+# it is highly related with node group. that is why put it here
+# Launch template outputs will be used in Karpenter Provisioners yaml files. Checkout this examples/karpenter/provisioners/default_provisioner_with_launch_templates.yaml
+module "karpenter_launch_templates" {
+  source         = "../../terraform-aws-eks-blueprints/modules/launch-templates"
+  eks_cluster_id = module.eks-blueprints.eks_cluster_id
+  tags           = { Name = "karpenter" }
+
+  launch_template_config = {
+    linux = {
+      ami                    = data.aws_ami.amazonlinux2eks.id
+      launch_template_prefix = "karpenter"
+      iam_instance_profile   = module.eks-blueprints.managed_node_group_iam_instance_profile_id[0]
+      vpc_security_group_ids = [module.eks-blueprints.worker_node_security_group_id]
+      block_device_mappings = [
+        {
+          device_name = "/dev/xvda"
+          volume_type = "gp3"
+          volume_size = "200"
+        }
+      ]
+    },
+    bottlerocket = {
+      ami                    = data.aws_ami.bottlerocket.id
+      launch_template_os     = "bottlerocket"
+      launch_template_prefix = "bottle"
+      iam_instance_profile   = module.eks-blueprints.managed_node_group_iam_instance_profile_id[0]
+      vpc_security_group_ids = [module.eks-blueprints.worker_node_security_group_id]
+      block_device_mappings = [
+        {
+          device_name = "/dev/xvda"
+          volume_type = "gp3"
+          volume_size = "200"
+        }
+      ]
+    },
+  }
 }

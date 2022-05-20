@@ -16,6 +16,7 @@
  - self managed node group
  - fargate_profiles
  - enable AMP for next step
+ - launch template for karpenter autoscalling 
 3. ADD-ONS
  - EKS adds-on
  - Argo CD 
@@ -23,6 +24,7 @@
  - log with fluent bit
        complete-kubernetes-addons goes to cloudwatch log
        observability/amp-amg-opensearch goes to opensearch 
+ - karpenter with irsa  
 
 4. optional. for add-ons not covered, you can get charts and check in your git repo for argocd. You may need to manaully create IRSA. 
 

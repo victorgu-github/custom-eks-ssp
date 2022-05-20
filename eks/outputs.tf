@@ -21,6 +21,11 @@ output "cluster_id" {
   value       = module.eks-blueprints.eks_cluster_id
 }
 
+output "managed_node_group_iam_instance_profile_id" {
+  description = ""
+  value       = module.eks-blueprints.managed_node_group_iam_instance_profile_id[0]
+}
+
 output "configure_kubectl" {
   description = "Configure kubectl: make sure you're logged in with the correct AWS profile and run the following command to update your kubeconfig"
   value       = module.eks-blueprints.configure_kubectl

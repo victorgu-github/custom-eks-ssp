@@ -57,6 +57,7 @@ data "aws_eks_addon_version" "default" {
   most_recent        = false
 }
 
+
 locals {
 
   cluster_version = data.aws_eks_cluster.cluster.version
@@ -121,6 +122,7 @@ module "kubernetes-addons" {
   enable_prometheus                    = true
   enable_amazon_prometheus             = true
   amazon_prometheus_workspace_endpoint = var.amp_endpoint
+  enable_karpenter                    = true
 
   # enable_aws_for_fluentbit = true
   # aws_for_fluentbit_helm_config = {
@@ -178,4 +180,3 @@ module "kubernetes-addons" {
   #   EOF
   # }
 }
-
