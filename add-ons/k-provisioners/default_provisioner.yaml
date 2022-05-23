@@ -5,22 +5,25 @@ metadata:
 spec:
   labels:
     intent: apps
-#   requirements:
-#     # - key: "topology.kubernetes.io/zone"
-#     #   operator: In
-#     #   values: [${azs}]
-#     - key: "karpenter.sh/capacity-type"
-#       operator: In
-#       values: ["spot", "on-demand"]
+  requirements:
+     # - key: "topology.kubernetes.io/zone"
+     #   operator: In
+     #   values: [${azs}]
+    - key: "karpenter.sh/capacity-type"
+      operator: In
+      values: ["spot", "on-demand"] #Karpenter prioritizes Spot offerings if the provisioner allows Spot and on-demand instances. 
   limits:
     resources:
       cpu: 1000
+      memory: 1000Gi
   provider:
-    instanceProfile: "aws005-preprod-test-eks-managed-ondemand"
+    #instanceProfile: "aws005-preprod-test-eks-managed-ondemand" # iam role
+    launchTemplate: "karpenter-aws005-preprod-test-eks"     # exclusive to  instanceProfile
     tags:
       accountingEC2Tag: KarpenterDevEnvironmentEC2
     subnetSelector:
       Name: "aws005-preprod-test-vpc-private*"
-    securityGroupSelector:
-      kubernetes.io/cluster/aws005-preprod-test-eks: 'owned'
-  ttlSecondsAfterEmpty: 120
+    #securityGroupSelector:
+     # kubernetes.io/cluster/aws005-preprod-test-eks: 'owned'
+  ttlSecondsAfterEmpty: 30
+  ttlSecondsUntilExpired: 2592000 # 30 Days = 60 * 60 * 24 * 30 Seconds;

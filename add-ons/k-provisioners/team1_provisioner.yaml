@@ -1,0 +1,39 @@
+apiVersion: karpenter.sh/v1alpha5
+kind: Provisioner
+metadata:
+  name: team1
+spec:
+  requirements:
+     # - key: "topology.kubernetes.io/zone"
+     #   operator: In
+     #   values: [${azs}]
+    - key: "node.kubernetes.io/instance-type"
+      operator: In
+      values: ["m5.large", "m5.2xlarge"]
+    - key: node.kubernetes.io/instance-type
+      operator: NotIn
+      values: ['m6g.16xlarge', 'm6gd.16xlarge', 'r6g.16xlarge', 'r6gd.16xlarge', 'c6g.16xlarge']
+    - key: "kubernetes.io/arch"
+      operator: In
+      values: ["arm64", "amd64"]
+    - key: "karpenter.sh/capacity-type"
+      operator: In
+      values: ["on-demand"] #team1 only wants to use on demand instance for critical workloads 
+  taints:  # only team1 should use Toleration to cope with this taint 
+  - effect: NoSchedule
+    key: team1
+  limits:
+    resources:
+      cpu: 128
+      memory: 100Gi
+  provider:
+    instanceProfile: "aws005-preprod-test-eks-managed-ondemand" # iam role
+    #launchTemplate: "karpenter-aws005-preprod-test-eks"     # exclusive to  instanceProfile and securitygroup
+    tags:
+      accountingEC2Tag: KarpenterDevteam1EC2
+    subnetSelector:
+      Name: "aws005-preprod-test-vpc-private*"
+    securityGroupSelector:
+      kubernetes.io/cluster/aws005-preprod-test-eks: 'owned'
+  ttlSecondsAfterEmpty: 30
+  ttlSecondsUntilExpired: 2592000 # 30 Days = 60 * 60 * 24 * 30 Seconds;

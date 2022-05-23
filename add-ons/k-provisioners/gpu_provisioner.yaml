@@ -1,0 +1,22 @@
+apiVersion: karpenter.sh/v1alpha5
+kind: Provisioner
+metadata:
+  name: gpu
+spec:
+  requirements:
+    - key: node.kubernetes.io/instance-type
+      operator: In
+      values: ["p3.8xlarge", "p3.16xlarge"]
+  taints:
+    - key: nvidia.com/gpu
+      value: "true"
+      effect: NoSchedule
+  provider:
+    instanceProfile: "aws005-preprod-test-eks-managed-ondemand" # self-managed IAM Instance profile Name
+    tags:
+      accountingEC2Tag: KarpenterDevGPUEC2
+    subnetSelector:
+      Name: "aws005-preprod-test-vpc-private*"
+    securityGroupSelector:
+      kubernetes.io/cluster/aws005-preprod-test-eks: 'owned'
+  ttlSecondsAfterEmpty: 60

@@ -16,7 +16,7 @@
  - self managed node group
  - fargate_profiles
  - enable AMP for next step
- - launch template for karpenter autoscalling 
+ - launch template for karpenter autoscalling (even optional for karpenter)
 3. ADD-ONS
  - EKS adds-on
  - Argo CD 
@@ -25,6 +25,10 @@
        complete-kubernetes-addons goes to cloudwatch log
        observability/amp-amg-opensearch goes to opensearch 
  - karpenter with irsa  
+     test karpenter deploy default_provisioner and inflate.yaml
+     kubectl get deployment inflate 
+     kubectl scale deployment inflate --replicas 1
+     kubectl describe node --selector=intent=apps
 
 4. optional. for add-ons not covered, you can get charts and check in your git repo for argocd. You may need to manaully create IRSA. 
 
