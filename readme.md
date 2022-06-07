@@ -57,4 +57,4 @@ need to modify backend.conf and base.tfvars in each subfolder and make sure the 
 
 # known issues:
 1. affinity settings in some applications can only work on one node group. so better create node group with >3 nodes
-2. 
+2. don't use argocd to deploy ALB controller which uses default SA and cause issue later.
