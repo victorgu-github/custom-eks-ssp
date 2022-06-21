@@ -111,10 +111,13 @@ data "aws_ami" "bottlerocket" {
 module "eks-blueprints" {
   source = "../../terraform-aws-eks-blueprints"
   # directly refer to github source = "github.com/aws-ia/terraform-aws-eks-blueprints"
-  tenant            = local.tenant
-  environment       = local.environment
-  zone              = local.zone
-  terraform_version = local.terraform_version
+  cluster_name = var.cluster_name
+  
+  //old version
+  # tenant            = local.tenant
+  # environment       = local.environment
+  # zone              = local.zone
+  # terraform_version = local.terraform_version
 
   # EKS Cluster VPC and Subnets
   vpc_id             = local.vpc_id
@@ -248,4 +251,96 @@ module "karpenter_launch_templates" {
       ]
     },
   }
+}
+
+
+resource "aws_elasticsearch_domain" "opensearch" {
+  domain_name           = "opensearch"
+  elasticsearch_version = "OpenSearch_1.1"
+
+  cluster_config {
+    instance_type          = "m6g.large.elasticsearch"
+    instance_count         = 3
+    zone_awareness_enabled = true
+
+    zone_awareness_config {
+      availability_zone_count = 3
+    }
+  }
+
+  node_to_node_encryption {
+    enabled = true
+  }
+
+  domain_endpoint_options {
+    enforce_https       = true
+    tls_security_policy = "Policy-Min-TLS-1-2-2019-07"
+  }
+
+  encrypt_at_rest {
+    enabled = true
+  }
+
+  ebs_options {
+    ebs_enabled = true
+    volume_size = 10
+  }
+
+  advanced_security_options {
+    enabled                        = true
+    internal_user_database_enabled = true
+
+    master_user_options {
+      master_user_name     = var.opensearch_dashboard_user
+      master_user_password = var.opensearch_dashboard_pw
+    }
+  }
+
+  vpc_options {
+    subnet_ids         = local.public_subnet_ids
+    security_group_ids = [aws_security_group.opensearch_access.id]
+  }
+
+  depends_on = [
+    aws_iam_service_linked_role.opensearch
+  ]
+
+  //tags = local.tags
+}
+
+resource "aws_security_group" "opensearch_access" {
+  vpc_id      = local.vpc_id
+  description = "OpenSearch access"
+
+  ingress {
+    description = "host access to OpenSearch"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    self        = true
+  }
+
+  ingress {
+    description = "allow instances in the VPC (like EKS) to communicate with OpenSearch"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+
+    cidr_blocks =[var.opensearch_cidr] 
+  }
+
+  egress {
+    description = "Allow all outbound access"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]  #tfsec:ignore:aws-vpc-no-public-egress-sgr
+  }
+
+ // tags = local.tags
+}
+
+resource "aws_iam_service_linked_role" "opensearch" {
+  count            = var.create_iam_service_linked_role == true ? 1 : 0
+  aws_service_name = "es.amazonaws.com"
 }

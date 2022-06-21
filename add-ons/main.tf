@@ -19,6 +19,7 @@ terraform {
   backend "s3" {}
 
 }
+
 provider "aws" {
   region = var.region
   alias  = "default"
@@ -57,6 +58,26 @@ data "aws_eks_addon_version" "default" {
   most_recent        = false
 }
 
+data "aws_iam_policy_document" "fluentbit_opensearch_access" {
+  statement {
+    sid       = "OpenSearchAccess"
+    effect    = "Allow"
+    resources = [var.opensearch_arn]
+    actions   = ["es:ESHttp*"]
+  }
+}
+
+data "aws_iam_policy_document" "opensearch_access_policy" {
+  statement {
+    effect    = "Allow"
+    resources = [var.opensearch_arn]
+    actions   = ["es:ESHttp*"]
+    principals {
+      type        = "*"
+      identifiers = ["*"]
+    }
+  }
+}
 
 locals {
 
@@ -89,6 +110,8 @@ module "kubernetes-addons" {
   #---------------------------------------------------------------
   # ARGO CD ADD-ON
   #---------------------------------------------------------------
+  enable_metrics_server     = true
+  //enable_cluster_autoscaler = true
 
   enable_argocd         = true
   argocd_manage_add_ons = true # Indicates that ArgoCD is responsible for managing/deploying Add-ons.
@@ -124,6 +147,21 @@ module "kubernetes-addons" {
   amazon_prometheus_workspace_endpoint = var.amp_endpoint
   enable_karpenter                    = true
 
+  // setup fluentbit for opensearch from observability
+  // opensearch manually or created in previous step and pass endpoint 
+  enable_aws_for_fluentbit        = true
+  aws_for_fluentbit_irsa_policies = [aws_iam_policy.fluentbit_opensearch_access.arn]
+  aws_for_fluentbit_helm_config = {
+    values = [templatefile("${path.module}/helm_values/aws-for-fluentbit-values.yaml", {
+      aws_region = var.region
+      host       = var.opensearch_endpoint
+    })]
+  }
+
+
+
+
+ // setup fluentbit for cloudwatch_logs from complete-kubernetes-addons
   # enable_aws_for_fluentbit = true
   # aws_for_fluentbit_helm_config = {
   #   name                                      = "aws-for-fluent-bit"
@@ -179,4 +217,17 @@ module "kubernetes-addons" {
   #     Decode_Field_As json message
   #   EOF
   # }
+}
+
+// for openseach
+
+resource "aws_iam_policy" "fluentbit_opensearch_access" {
+  name        = "fluentbit_opensearch_access"
+  description = "IAM policy to allow Fluentbit access to OpenSearch"
+  policy      = data.aws_iam_policy_document.fluentbit_opensearch_access.json
+}
+
+resource "aws_elasticsearch_domain_policy" "opensearch_access_policy" {
+  domain_name     = "opensearch" //hard code
+  access_policies = data.aws_iam_policy_document.opensearch_access_policy.json
 }

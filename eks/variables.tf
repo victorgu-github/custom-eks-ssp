@@ -37,6 +37,11 @@ variable "tf_state_vpc_s3_key" {
   description = "Terraform state S3 Key path"
 }
 
+variable "cluster_name" {
+  type        = string
+  description = ""
+}
+
 variable "tenant" {
   type        = string
   description = "Account Name or unique account unique id e.g., apps or management or aws007"
@@ -79,3 +84,27 @@ variable "create_eks" {
   description = "Create EKS cluster"
 }
 
+variable "opensearch_dashboard_user" {
+  description = "OpenSearch dashboard user"
+  type        = string
+  default     = "victor"
+}
+
+variable "opensearch_dashboard_pw" {
+  description = "OpenSearch dashboard user password"
+  type        = string
+  default     = "Victor123!"
+  sensitive   = true
+}
+
+variable "opensearch_cidr" {
+  description = ""
+  type        = string
+  default     = null
+}
+
+variable "create_iam_service_linked_role" {
+  description = "Whether to create the AWSServiceRoleForAmazonElasticsearchService role used by the OpenSearch service"
+  type        = bool
+  default     = true
+}

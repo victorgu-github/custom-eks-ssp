@@ -16,14 +16,18 @@
  - self managed node group
  - fargate_profiles
  - enable AMP for next step
+ - create opensearch in public subnet for next step
  - launch template for karpenter autoscalling (even optional for karpenter)
 3. ADD-ONS
  - EKS adds-on
  - Argo CD 
  - AMP (/ at end in workspace url) tf deploys irsa and workspace. argocd deploys promethus chart
  - log with fluent bit
-       complete-kubernetes-addons goes to cloudwatch log
-       observability/amp-amg-opensearch goes to opensearch 
+       observability/amp-amg-opensearch goes to opensearch (vpc)
+       
+       note: fargate sidecar deploy manually https://docs.aws.amazon.com/eks/latest/userguide/fargate-logging.html
+       note: fluentbit and opensearch how to do manually https://www.eksworkshop.com/intermediate/230_logging/
+       note: complete-kubernetes-addons goes to cloudwatch log
  - karpenter with irsa  
      test karpenter deploy default_provisioner and inflate.yaml
      kubectl get deployment inflate 
@@ -58,3 +62,4 @@ need to modify backend.conf and base.tfvars in each subfolder and make sure the 
 # known issues:
 1. affinity settings in some applications can only work on one node group. so better create node group with >3 nodes
 2. don't use argocd to deploy ALB controller which uses default SA and cause issue later.
+3. fluentbit deploy with argocd error

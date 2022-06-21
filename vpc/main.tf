@@ -32,7 +32,7 @@ locals {
   zone        = var.zone
   region      = var.region
 
-  vpc_cidr       = "10.0.0.0/16"
+  vpc_cidr       = var.default_vpc_ipv4_cidr
   vpc_name       = join("-", [local.tenant, local.environment, local.zone, "vpc"])
   eks_cluster_id = join("-", [local.tenant, local.environment, local.zone, "eks"])
 
