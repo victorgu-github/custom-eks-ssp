@@ -1,0 +1,12 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": [
+                "es:ESHttp*"
+            ],
+            "Resource": "arn:aws:es:us-west-2:349361870252:domain/opensearch-public",
+            "Effect": "Allow"
+        }
+    ]
+}

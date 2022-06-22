@@ -147,6 +147,11 @@ module "kubernetes-addons" {
   amazon_prometheus_workspace_endpoint = var.amp_endpoint
   enable_karpenter                    = true
 
+
+  // its helm config is at argocd repo 
+  enable_aws_load_balancer_controller = true
+
+
   // setup fluentbit for opensearch from observability
   // opensearch manually or created in previous step and pass endpoint 
   enable_aws_for_fluentbit        = true
