@@ -18,6 +18,12 @@
  - enable AMP for next step
  - create opensearch (VPC mode) in public subnet for next step
  - launch template for karpenter autoscalling (even optional for karpenter)
+ - 
+2a. EKS fargate only
+ - create a eks cluster with fargate onyl
+ - also includes add-ons
+ - cannot use with eks folder together since they share the same VPC
+
 3. ADD-ONS
  - EKS adds-on
  - Argo CD 
@@ -36,6 +42,9 @@
      kubectl describe node --selector=intent=apps
 
 4. optional. for add-ons not covered, you can get charts and check in your git repo for argocd. You may need to manaully create IRSA. 
+
+5. fargate-serverless-VPC is a seperate example which puts VPC, EKS-fargate and addons into the same folder. 
+
 
 # terraform instructions
 need to modify backend.conf and base.tfvars in each subfolder and make sure the variables are matched
