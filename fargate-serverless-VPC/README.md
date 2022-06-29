@@ -16,10 +16,10 @@ This example solution has been developed to work around these current limitation
 ⚠️ The management of CoreDNS as demonstrated in this example is intended to be used on new clusters. Existing clusters with existing workloads will see downtime if the CoreDNS deployment is modified as shown here.
 
 # other components
-adot-amp shows how to use adot on fargate and send metrics to AMP
-ALB-demo, demos internal/external alb and websocket
-efs-prometheus, demos installing prometheus on fargate with EFS
-logging shows turning on built in fluentbit in fargate and test-app
+- adot-amp shows how to use adot on fargate and send metrics to AMP
+- ALB-demo, demos internal/external alb and websocket
+- efs-prometheus, demos installing prometheus on fargate with EFS
+- logging shows turning on built in fluentbit in fargate and test-app
 
 
 ## Prerequisites:

@@ -1,0 +1,4 @@
+- based on eks folder, add fargate serverless to make the whole cluster fargate only.
+- the network is based on VPC folder
+- also include add-ons, not need to run add-ons seperately
+- pls delete eks before run this one since they share the same vpc
