@@ -1,2 +1,7 @@
 vpc/.terraform.lock.hcl
 vpc/.terraform
+fargate-serverless-VPC/.terraform
+fargate-serverless-VPC/.terraform.lock.hcl
+fargate-serverless-VPC/terraform.tfstate
+fargate-serverless-VPC/terraform.tfstate.backup
+
