@@ -17,9 +17,20 @@ This example solution has been developed to work around these current limitation
 
 # other components
 - adot-amp shows how to use adot on fargate and send metrics to AMP
+   use tf to create AMP and AMPingest role
+   update endpoint and region and deploy adot-collector-fargate.yaml
+   deploy sample go app  https://github.com/aws-observability/aws-otel-community/tree/master/sample-apps/prometheus-sample-app
+   add new grafana dashboard https://aws-observability.github.io/aws-o11y-recipes/recipes/fargate-eks-metrics-go-adot-ampamg/prometheus-sample-app-dashboard.json
+
 - ALB-demo, demos internal/external alb and websocket
 - efs-prometheus, demos installing prometheus on fargate with EFS
 - logging shows turning on built in fluentbit in fargate and test-app
+   install opensearch by tf. also set access policy and attach to fargate profile execution role
+   update opensearch endpoint and AWS_Region in fargate-cm.yaml and deploy
+   deploy test app
+   
+
+   
 
 
 ## Prerequisites:

@@ -83,6 +83,7 @@ module "eks_blueprints" {
     # Providing compute for default namespace
     default = {
       fargate_profile_name = "default"
+      additional_iam_policies = ["arn:aws:iam::349361870252:policy/eks-fargate-logging-policy"]
       fargate_profile_namespaces = [
         {
           namespace = "default"
@@ -109,6 +110,7 @@ module "eks_blueprints" {
         # Providing compute for default namespace
     testing = {
       fargate_profile_name = "testing"
+      additional_iam_policies = ["arn:aws:iam::349361870252:policy/eks-fargate-logging-policy"]
       fargate_profile_namespaces = [
         {
           namespace = "redis"
@@ -181,7 +183,8 @@ module "eks_blueprints_kubernetes_addons" {
   # Prometheus and Amazon Managed Prometheus integration
   #enable_prometheus                    = true
   #enable_amazon_prometheus             = true
-  #amazon_prometheus_workspace_endpoint = var.amp_endpoint
+  #amazon_prometheus_workspace_endpoint = module.managed_prometheus.workspace_prometheus_endpoint
+  
 
   tags = local.tags
 
@@ -274,6 +277,140 @@ resource "null_resource" "modify_kube_dns" {
     null_resource.remove_default_coredns_deployment
   ]
 }
+
+
+resource "aws_elasticsearch_domain" "opensearch" {
+  domain_name           = "opensearch-demo"
+  elasticsearch_version = "OpenSearch_1.2"
+
+  cluster_config {
+    instance_type          = "m6g.large.elasticsearch"
+    instance_count         = 1
+   
+  }
+
+  node_to_node_encryption {
+    enabled = true
+  }
+
+  domain_endpoint_options {
+    enforce_https       = true
+    tls_security_policy = "Policy-Min-TLS-1-2-2019-07"
+  }
+
+  encrypt_at_rest {
+    enabled = true
+  }
+  
+  ebs_options {
+    ebs_enabled = true
+    volume_size = 10
+  }
+
+  advanced_security_options {
+    enabled                        = true
+    internal_user_database_enabled = true
+
+    master_user_options {
+      master_user_name     = var.opensearch_dashboard_user
+      master_user_password = var.opensearch_dashboard_pw
+    }
+  }
+
+  tags = local.tags
+}
+
+
+
+// access policy in opensearch
+resource "aws_elasticsearch_domain_policy" "opensearch_access_policy" {
+  domain_name     = aws_elasticsearch_domain.opensearch.domain_name
+  access_policies = data.aws_iam_policy_document.opensearch_access_policy.json
+}
+data "aws_iam_policy_document" "opensearch_access_policy" {
+  statement {
+    effect    = "Allow"
+    resources = ["${aws_elasticsearch_domain.opensearch.arn}/*"]
+    actions   = ["es:ESHttp*"]
+    principals {
+      type        = "*"
+      identifiers = ["*"]
+    }
+  }
+}
+
+
+// access policy for fargate execution role 
+resource "aws_iam_policy" "fluentbit_opensearch_access" {
+  name        = "eks-fargate-logging-policy"
+  description = "IAM policy to allow Fluentbit access to OpenSearch"
+  policy      = data.aws_iam_policy_document.fluentbit_opensearch_access.json
+}
+data "aws_iam_policy_document" "fluentbit_opensearch_access" {
+  statement {
+    sid       = "OpenSearchAccess"
+    effect    = "Allow"
+    resources = ["${aws_elasticsearch_domain.opensearch.arn}/*"]
+    actions   = ["es:ESHttp*"]
+  }
+}
+
+//AMP
+module "managed_prometheus" {
+  source  = "terraform-aws-modules/managed-service-prometheus/aws"
+  version = "~> 2.1"
+
+  workspace_alias = local.name
+
+  tags = local.tags
+}
+
+# create irsa for adot 
+resource "aws_iam_role" "amp_ingest_role" {
+  name = "${local.name}-amp-ingest-irsa"
+
+  # Terraform's "jsonencode" function converts a
+  # Terraform expression result to valid JSON syntax.
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRoleWithWebIdentity"
+        Effect = "Allow"
+        Sid    = ""
+        Principal = {
+          Federated = "${module.eks_blueprints.eks_oidc_provider_arn}"
+        }
+        
+      },
+    ]
+  })
+  
+  inline_policy {
+    name = "my_inline_policy"
+
+    policy = jsonencode({
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Action   = [
+             "aps:RemoteWrite", 
+             "aps:GetSeries", 
+             "aps:GetLabels",
+             "aps:GetMetricMetadata"
+          ]
+          Effect   = "Allow"
+          Resource = "*"
+        },
+      ]
+    })
+  }
+
+  tags = local.tags
+}
+
+
+
 
 #---------------------------------------------------------------
 # Supporting Resources

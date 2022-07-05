@@ -39,12 +39,14 @@ metadata:
   annotations:
     alb.ingress.kubernetes.io/scheme: internal
     alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/conditions.service-2048: >
+      [{"field":"http-header","httpHeaderConfig":{"httpHeaderName": "HeaderName", "values":["app2"]}}]
 spec:
   ingressClassName: alb
   rules:
     - http:
         paths:
-        - path: /app1
+        - path: /
           pathType: Prefix
           backend:
             service:
