@@ -4,4 +4,9 @@ fargate-serverless-VPC/.terraform
 fargate-serverless-VPC/.terraform.lock.hcl
 fargate-serverless-VPC/terraform.tfstate
 fargate-serverless-VPC/terraform.tfstate.backup
-
+eks-fargate-only/.terraform.lock.hcl
+eks-fargate-only/.terraform
+eks/.terraform.lock.hcl
+eks/.terraform
+add-ons/.terraform.lock.hcl
+add-ons/.terraform

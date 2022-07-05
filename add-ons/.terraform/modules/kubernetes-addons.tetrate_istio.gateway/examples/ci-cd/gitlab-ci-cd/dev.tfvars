@@ -1,6 +1,0 @@
-tenant             = "aws002"
-environment        = "preprod"
-zone               = "dev"
-kubernetes_version = "1.21"
-vpc_cidr           = "10.2.0.0/16"
-terraform_version  = "Terraform v1.1.3"
