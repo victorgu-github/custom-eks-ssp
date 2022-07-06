@@ -1,1 +1,0 @@
-eks_cluster_id = "aws005-preprod-test-eks"
