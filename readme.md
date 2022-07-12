@@ -44,7 +44,7 @@
 4. optional. for add-ons not covered, you can get charts and check in your git repo for argocd. You may need to manaully create IRSA. 
 
 5. fargate-serverless-VPC is a seperate example which puts VPC, EKS-fargate and addons into the same folder. 
-
+it creates a eks cluster with fargate only, opensearch service and irsa for adot. 
 
 # terraform instructions
 need to modify backend.conf and base.tfvars in each subfolder and make sure the variables are matched

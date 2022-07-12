@@ -32,15 +32,15 @@ data "aws_caller_identity" "current" {}
 data "aws_availability_zones" "available" {}
 
 locals {
-  name   = "aws006-preprod-test-eks"
-  region = "us-east-1"
+  name   = var.name
+  region = var.region
 
-  vpc_cidr = "10.0.0.0/16"
+  vpc_cidr = var.vpc_cidr
   azs      = slice(data.aws_availability_zones.available.names, 0, 3)
 
   tags = {
     Blueprint  = local.name
-    GithubRepo = "github.com/aws-ia/terraform-aws-eks-blueprints"
+    GithubRepo = "terraform-aws-eks-blueprints"
   }
   
     #---------------------------------------------------------------
@@ -50,6 +50,8 @@ locals {
     path               = "chart"
     repo_url           = "https://git-codecommit.us-west-2.amazonaws.com/v1/repos/eks-addons-config"
     add_on_application = true
+    #ssh_key_secret_name = var.gitkey  # Needed for private repos
+    insecure            = false # Set to true to disable the server's certificate verification
   }
 
   #---------------------------------------------------------------
@@ -167,7 +169,7 @@ module "eks_blueprints_kubernetes_addons" {
   }
 
 
-  #enable_metrics_server     = true
+  enable_metrics_server     = true
   enable_argocd         = true
   argocd_manage_add_ons = true # Indicates that ArgoCD is responsible for managing/deploying Add-ons.
   argocd_applications = {
@@ -175,11 +177,8 @@ module "eks_blueprints_kubernetes_addons" {
     #workloads = local.workload_application
   }
   
-  // enable_aws_efs_csi_driver           = true # no need for fargate 
-  //enable_amazon_eks_aws_ebs_csi_driver = true
-  
   enable_aws_load_balancer_controller = true
-  
+
   # Prometheus and Amazon Managed Prometheus integration
   #enable_prometheus                    = true
   #enable_amazon_prometheus             = true
