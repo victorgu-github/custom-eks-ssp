@@ -279,7 +279,7 @@ resource "null_resource" "modify_kube_dns" {
 
 
 resource "aws_elasticsearch_domain" "opensearch" {
-  domain_name           = "opensearch-demo"
+  domain_name           = "${local.name}-demo"
   elasticsearch_version = "OpenSearch_1.2"
 
   cluster_config {
@@ -341,7 +341,7 @@ data "aws_iam_policy_document" "opensearch_access_policy" {
 
 // access policy for fargate execution role 
 resource "aws_iam_policy" "fluentbit_opensearch_access" {
-  name        = "eks-fargate-logging-policy"
+  name        = "${local.name}-eks-fargate-logging-policy"
   description = "IAM policy to allow Fluentbit access to OpenSearch"
   policy      = data.aws_iam_policy_document.fluentbit_opensearch_access.json
 }

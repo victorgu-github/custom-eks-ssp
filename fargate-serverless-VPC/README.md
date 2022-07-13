@@ -75,5 +75,5 @@ kube-system   coredns-dcc8d4c97-2jvfb   1/1     Running   0          2m28s
 To teardown and remove the resources created in this example:
 
 ```sh
-terraform destroy -auto-approve
+terraform destroy  -var-file base.tfvars -auto-approve
 ```
