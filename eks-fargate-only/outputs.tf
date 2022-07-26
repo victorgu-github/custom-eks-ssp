@@ -31,7 +31,7 @@ output "configure_kubectl" {
   value       = module.eks-blueprints.configure_kubectl
 }
 
-output "AMP_endpoint" {
-  description = "AMP_endpoint"
-  value       = module.eks-blueprints.amazon_prometheus_workspace_endpoint
-}
+# output "AMP_endpoint" {
+#   description = "AMP_endpoint"
+#   value       = module.eks-blueprints.amazon_prometheus_workspace_endpoint
+# }

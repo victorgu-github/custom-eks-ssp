@@ -244,7 +244,7 @@ module "eks-blueprints" {
 
 
     # AWS Managed Services
-  enable_amazon_prometheus = true
+  # enable_amazon_prometheus = true
 }
 
 

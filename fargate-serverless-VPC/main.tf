@@ -122,6 +122,16 @@ module "eks_blueprints" {
       {
           namespace = "testing"
       }]
+      
+      subnet_ids = module.vpc.private_subnets
+    }
+    
+    gatekeeper-system = {
+      fargate_profile_name = "gatekeeper-system"
+      fargate_profile_namespaces = [
+        {
+          namespace = "gatekeeper-system"
+      }]
 
       subnet_ids = module.vpc.private_subnets
     }
@@ -161,13 +171,17 @@ module "eks_blueprints_kubernetes_addons" {
     resolve_conflicts = "OVERWRITE"
   }
 
-  enable_self_managed_coredns = true
-  self_managed_coredns_helm_config = {
-    # Sets the correct annotations to ensure the Fargate provisioner is used and not the EC2 provisioner
-    compute_type       = "fargate"
-    kubernetes_version = module.eks_blueprints.eks_cluster_version
+  # enable_self_managed_coredns = true
+  # self_managed_coredns_helm_config = {
+  #   # Sets the correct annotations to ensure the Fargate provisioner is used and not the EC2 provisioner
+  #   compute_type       = "fargate"
+  #   kubernetes_version = module.eks_blueprints.eks_cluster_version
+  # }
+  enable_amazon_eks_coredns = true
+  amazon_eks_coredns_config = {
+    addon_version     = data.aws_eks_addon_version.latest["coredns"].version
+    resolve_conflicts = "OVERWRITE"
   }
-
 
   enable_metrics_server     = true
   enable_argocd         = true
@@ -188,13 +202,18 @@ module "eks_blueprints_kubernetes_addons" {
   tags = local.tags
 
   depends_on = [
-    # CoreDNS provided by EKS needs to be updated before applying self-managed CoreDNS Helm addon
-    null_resource.modify_kube_dns
+    module.eks_blueprints,
+    null_resource.remove_default_coredns_deployment
   ]
+
+  # depends_on = [
+  #   # CoreDNS provided by EKS needs to be updated before applying self-managed CoreDNS Helm addon
+  #   null_resource.modify_kube_dns
+  # ]
 }
 
 data "aws_eks_addon_version" "latest" {
-  for_each = toset(["kube-proxy", "vpc-cni"])
+  for_each = toset(["kube-proxy", "vpc-cni","coredns"])
 
   addon_name         = each.value
   kubernetes_version = module.eks_blueprints.eks_cluster_version
@@ -254,28 +273,28 @@ resource "null_resource" "remove_default_coredns_deployment" {
   }
 }
 
-resource "null_resource" "modify_kube_dns" {
-  triggers = {}
+# resource "null_resource" "modify_kube_dns" {
+#   triggers = {}
 
-  provisioner "local-exec" {
-    interpreter = ["/bin/bash", "-c"]
-    environment = {
-      KUBECONFIG = base64encode(local.kubeconfig)
-    }
+#   provisioner "local-exec" {
+#     interpreter = ["/bin/bash", "-c"]
+#     environment = {
+#       KUBECONFIG = base64encode(local.kubeconfig)
+#     }
 
-    # We are maintaing the existing kube-dns service and annotating it for Helm to assume control
-    command = <<-EOT
-      echo "Setting implicit dependency on ${module.eks_blueprints.fargate_profiles["kube_system"].eks_fargate_profile_arn}"
-      kubectl --namespace kube-system annotate --overwrite service kube-dns meta.helm.sh/release-name=coredns --kubeconfig <(echo $KUBECONFIG | base64 --decode)
-      kubectl --namespace kube-system annotate --overwrite service kube-dns meta.helm.sh/release-namespace=kube-system --kubeconfig <(echo $KUBECONFIG | base64 --decode)
-      kubectl --namespace kube-system label --overwrite service kube-dns app.kubernetes.io/managed-by=Helm --kubeconfig <(echo $KUBECONFIG | base64 --decode)
-    EOT
-  }
+#     # We are maintaing the existing kube-dns service and annotating it for Helm to assume control
+#     command = <<-EOT
+#       echo "Setting implicit dependency on ${module.eks_blueprints.fargate_profiles["kube_system"].eks_fargate_profile_arn}"
+#       kubectl --namespace kube-system annotate --overwrite service kube-dns meta.helm.sh/release-name=coredns --kubeconfig <(echo $KUBECONFIG | base64 --decode)
+#       kubectl --namespace kube-system annotate --overwrite service kube-dns meta.helm.sh/release-namespace=kube-system --kubeconfig <(echo $KUBECONFIG | base64 --decode)
+#       kubectl --namespace kube-system label --overwrite service kube-dns app.kubernetes.io/managed-by=Helm --kubeconfig <(echo $KUBECONFIG | base64 --decode)
+#     EOT
+#   }
 
-  depends_on = [
-    null_resource.remove_default_coredns_deployment
-  ]
-}
+#   depends_on = [
+#     null_resource.remove_default_coredns_deployment
+#   ]
+# }
 
 
 resource "aws_elasticsearch_domain" "opensearch" {
