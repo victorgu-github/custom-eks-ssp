@@ -1,7 +1,7 @@
 variable "name" {
   type        = string
   description = "cluster name"
-  default     = "aws013-preprod-test-eks"
+  default     = "aws012-preprod-test-eks"
 }
 
 variable "region" {
