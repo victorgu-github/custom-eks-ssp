@@ -116,7 +116,9 @@ module "eks_blueprints" {
       node_group_name = "managed-ondemand"
       instance_types  = ["m5.large"]
       subnet_ids      =  module.vpc.private_subnets
-      desired_size    = 3      
+      desired_size    = 5     
+      max_size               = 5
+      min_size               = 3
     }
   }
   
@@ -159,6 +161,8 @@ module "eks_blueprints_kubernetes_addons" {
   }
 
   enable_metrics_server     = true
+  enable_aws_efs_csi_driver = true
+  enable_amazon_eks_aws_ebs_csi_driver  = true
   # enable_argocd         = true
   # argocd_manage_add_ons = true # Indicates that ArgoCD is responsible for managing/deploying Add-ons.
   # argocd_applications = {
@@ -225,8 +229,27 @@ locals {
   })
 }
 
+# don't install here since cannot see logs
+# resource "null_resource" "install_kubeflow" {
+#   triggers = {}
 
+#   provisioner "local-exec" {
+#     interpreter = ["/bin/bash", "-c"]
+#     environment = {
+#       KUBECONFIG = base64encode(local.kubeconfig)
+#     }
 
+#     # We are maintaing the existing kube-dns service and annotating it for Helm to assume control
+#     command = <<-EOT
+#       echo "Intalling kuebflow on EKS with Vanilla setting by Kustomize"
+#       while ! kustomize build deployments/vanilla | kubectl apply -f -; do echo "Retrying to apply resources"; sleep 30; done
+#     EOT
+#   }
+
+#   depends_on = [
+#       module.eks_blueprints
+#   ]
+# }
 
 #---------------------------------------------------------------
 # Supporting Resources

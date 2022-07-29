@@ -10,3 +10,5 @@ eks/.terraform.lock.hcl
 eks/.terraform
 add-ons/.terraform.lock.hcl
 add-ons/.terraform
+eks-kubeflow/.terraform.lock.hcl
+eks-kubeflow/.terraform
