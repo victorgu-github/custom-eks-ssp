@@ -63,6 +63,7 @@ kubectl apply -f ebs-sc.yaml
 kubectl patch storageclass ebs-sc -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
 kubectl patch storageclass gp2 -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"false"}}}'
 
+kubectl apply -f ingress.yaml -n istio-system
 ```
 
 

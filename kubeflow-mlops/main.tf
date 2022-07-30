@@ -33,7 +33,7 @@ data "aws_availability_zones" "available" {}
 
 locals {
   name   = var.name
-  region = var.region
+  region =  "us-east-2"
 
   vpc_cidr = var.vpc_cidr
   azs      = slice(data.aws_availability_zones.available.names, 0, 3)
@@ -105,7 +105,7 @@ module "eks_blueprints_kubernetes_addons" {
   enable_metrics_server     = true
   enable_aws_efs_csi_driver = true
   enable_amazon_eks_aws_ebs_csi_driver  = true
-  
+  enable_aws_load_balancer_controller = true
 
   tags = local.tags
 
