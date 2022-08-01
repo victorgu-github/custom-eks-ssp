@@ -33,7 +33,7 @@ data "aws_availability_zones" "available" {}
 
 locals {
   name   = var.name
-  region =  "us-east-2"
+  region =  var.region
 
   vpc_cidr = var.vpc_cidr
   azs      = slice(data.aws_availability_zones.available.names, 0, 3)
