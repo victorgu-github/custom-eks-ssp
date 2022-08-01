@@ -82,9 +82,16 @@ kubectl get pods --namespace=kubeflow # Output shows kubeflow pods
 
 
 ## Execute Machine learning jobs on Kubeflow
-
-
+log into Kubeflow UI with default username and password <br>
+get URL by running command below
 ```
+kubectl get ingress -n istio-system
+
+username: user@example.com
+password: 12341234
+```
+please change the default username and password by using https://awslabs.github.io/kubeflow-manifests/docs/deployment/vanilla/guide/#change-default-user-password
+
 
 ## Cleanup
 
@@ -103,12 +110,3 @@ Finally, destroy any additional resources that are not in the above modules
 ```sh
 terraform destroy -auto-approve
 ```
-
-
-
-# clone kubeflow and kubeflow on aws repos
-export KUBEFLOW_RELEASE_VERSION=v1.5.1
-export AWS_RELEASE_VERSION=v1.5.1-aws-b1.0.0
-git clone https://github.com/awslabs/kubeflow-manifests.git && cd kubeflow-manifests
-git checkout ${AWS_RELEASE_VERSION}
-git clone --branch ${KUBEFLOW_RELEASE_VERSION} https://github.com/kubeflow/manifests.git upstream
