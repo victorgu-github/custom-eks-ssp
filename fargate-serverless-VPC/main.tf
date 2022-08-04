@@ -85,7 +85,8 @@ module "eks_blueprints" {
     # Providing compute for default namespace
     default = {
       fargate_profile_name = "default"
-      additional_iam_policies = ["arn:aws:iam::349361870252:policy/eks-fargate-logging-policy"]
+      # opensearch not created at this time, manually attach xxx-eks-fargate-logging-policy to fargate execution role 
+      #additional_iam_policies = [aws_iam_policy.fluentbit_opensearch_access.arn] 
       fargate_profile_namespaces = [
         {
           namespace = "default"
@@ -112,7 +113,7 @@ module "eks_blueprints" {
         # Providing compute for default namespace
     testing = {
       fargate_profile_name = "testing"
-      additional_iam_policies = ["arn:aws:iam::349361870252:policy/eks-fargate-logging-policy"]
+      #additional_iam_policies = [aws_iam_policy.fluentbit_opensearch_access.arn]
       fargate_profile_namespaces = [
         {
           namespace = "redis"
