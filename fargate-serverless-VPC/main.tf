@@ -374,43 +374,43 @@ module "vpc_endpoints" {
   endpoints = {
     ssm = {
       service             = "ssm"
-      private_dns_enabled = true
+      private_dns_enabled = false
     },
     logs = {
       service             = "logs"
-      private_dns_enabled = true
+      private_dns_enabled = false
     },
     autoscaling = {
       service             = "autoscaling"
-      private_dns_enabled = true
+      private_dns_enabled = false
     },
     sts = {
       service             = "sts"
-      private_dns_enabled = true
+      private_dns_enabled = false
     },
     elasticloadbalancing = {
       service             = "elasticloadbalancing"
-      private_dns_enabled = true
+      private_dns_enabled = false
     },
     ec2 = {
       service             = "ec2"
-      private_dns_enabled = true
+      private_dns_enabled = false
     },
     ec2messages = {
       service             = "ec2messages"
-      private_dns_enabled = true
+      private_dns_enabled = false
     },
     ecr_api = {
       service             = "ecr.api"
-      private_dns_enabled = true
+      private_dns_enabled = false
     },
     ecr_dkr = {
       service             = "ecr.dkr"
-      private_dns_enabled = true
+      private_dns_enabled = false
     },
     kms = {
       service             = "kms"
-      private_dns_enabled = true
+      private_dns_enabled = false
     }
   }
   tags = {

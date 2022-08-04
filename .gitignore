@@ -14,3 +14,4 @@ kubeflow-mlops/.terraform.lock.hcl
 kubeflow-mlops/.terraform
 kubeflow-mlops/terraform.tfstate
 kubeflow-mlops/terraform.tfstate.backup
+fargate-serverless-VPC-east/
