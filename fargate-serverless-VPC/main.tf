@@ -368,53 +368,80 @@ module "vpc_endpoints" {
   version            = "v3.2.0"
   create             = true
   vpc_id             = module.vpc.vpc_id
-  security_group_ids = [data.aws_security_group.default.id]
+  security_group_ids = [module.vpc_endpoints_sg.security_group_id]
   subnet_ids         = module.vpc.private_subnets
 
   endpoints = {
     ssm = {
       service             = "ssm"
-      private_dns_enabled = false
+      private_dns_enabled = true
     },
     logs = {
       service             = "logs"
-      private_dns_enabled = false
+      private_dns_enabled = true
     },
     autoscaling = {
       service             = "autoscaling"
-      private_dns_enabled = false
+      private_dns_enabled = true
     },
     sts = {
       service             = "sts"
-      private_dns_enabled = false
+      private_dns_enabled = true
     },
     elasticloadbalancing = {
       service             = "elasticloadbalancing"
-      private_dns_enabled = false
+      private_dns_enabled = true
     },
     ec2 = {
       service             = "ec2"
-      private_dns_enabled = false
+      private_dns_enabled = true
     },
     ec2messages = {
       service             = "ec2messages"
-      private_dns_enabled = false
+      private_dns_enabled = true
     },
     ecr_api = {
       service             = "ecr.api"
-      private_dns_enabled = false
+      private_dns_enabled = true
     },
     ecr_dkr = {
       service             = "ecr.dkr"
-      private_dns_enabled = false
+      private_dns_enabled = true
     },
     kms = {
       service             = "kms"
-      private_dns_enabled = false
+      private_dns_enabled = true
     }
   }
   tags = {
     Project  = "EKS"
     Endpoint = "true"
   }
+}
+
+module "vpc_endpoints_sg" {
+  source  = "terraform-aws-modules/security-group/aws"
+  version = "~> 4.0"
+
+  name        = "${local.name}-vpc-endpoints"
+  description = "Security group for VPC endpoint access"
+  vpc_id      = module.vpc.vpc_id
+
+  ingress_with_cidr_blocks = [
+    {
+      rule        = "https-443-tcp"
+      description = "VPC CIDR HTTPS"
+      cidr_blocks = join(",", module.vpc.private_subnets_cidr_blocks)
+    },
+  ]
+
+  egress_with_cidr_blocks = [
+    {
+      rule        = "https-443-tcp"
+      description = "All egress HTTPS"
+      cidr_blocks = "0.0.0.0/0"
+    },
+  ]
+
+  tags = local.tags
 }
