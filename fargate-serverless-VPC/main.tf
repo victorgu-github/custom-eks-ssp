@@ -34,7 +34,8 @@ data "aws_availability_zones" "available" {}
 locals {
   name   = var.name
   region = var.region
-
+  account_id = data.aws_caller_identity.current.account_id
+  
   vpc_cidr = var.vpc_cidr
   azs      = slice(data.aws_availability_zones.available.names, 0, 3)
 
@@ -141,7 +142,7 @@ module "eks_blueprints" {
     # List of map_roles
   map_roles          = [
     {
-      rolearn  = "arn:aws:iam::349361870252:role/Admin"     # The ARN of the IAM role
+      rolearn  = "arn:aws:iam::${local.account_id}:role/Admin"     # The ARN of the IAM role
       username = "cluster-admin"                                      # The user name within Kubernetes to map to the IAM role
       groups   = ["system:masters"]                                   # A list of groups within Kubernetes to which the role is mapped; Checkout K8s Role and Rolebindings
     }
