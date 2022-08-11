@@ -18,6 +18,11 @@ output "amp_ingest_role_arn" {
   value       = aws_iam_role.amp_ingest_role.arn
 }
 
+output "amp_query_role_arn" {
+  description = "amp_query_role_arn"
+  value       = aws_iam_role.amp_query_role.arn
+}
+
 output "cluster_vpc_id" {
   description = "cluster_vpc_id"
   value       = module.vpc.vpc_id

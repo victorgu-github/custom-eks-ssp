@@ -123,6 +123,9 @@ module "eks_blueprints" {
       },
       {
           namespace = "testing"
+      },
+      {
+          namespace = "grafana"
       }]
       
       subnet_ids = module.vpc.private_subnets
@@ -196,8 +199,8 @@ module "eks_blueprints_kubernetes_addons" {
   enable_aws_load_balancer_controller = true
 
   # Prometheus and Amazon Managed Prometheus integration
-  #enable_prometheus                    = true
-  #enable_amazon_prometheus             = true
+  #enable_prometheus                    = true # Deploys Prometheus server with remote write to AWS AMP Workspace
+  #enable_amazon_prometheus             = true # Creates all the relevant IAM Roles for AMP
   #amazon_prometheus_workspace_endpoint = module.managed_prometheus.workspace_prometheus_endpoint
   
 

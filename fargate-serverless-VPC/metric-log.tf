@@ -127,3 +127,48 @@ resource "aws_iam_role" "amp_ingest_role" {
 
   tags = local.tags
 }
+
+
+# create irsa for grafana
+resource "aws_iam_role" "amp_query_role" {
+  name = "${local.name}-amp-query-irsa"
+
+  # Terraform's "jsonencode" function converts a
+  # Terraform expression result to valid JSON syntax.
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRoleWithWebIdentity"
+        Effect = "Allow"
+        Sid    = ""
+        Principal = {
+          Federated = "${module.eks_blueprints.eks_oidc_provider_arn}"
+        }
+        
+      },
+    ]
+  })
+  
+  inline_policy {
+    name = "my_inline_policy"
+
+    policy = jsonencode({
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Action   = [
+                "aps:QueryMetrics",
+                "aps:GetSeries",
+                "aps:GetLabels",
+                "aps:GetMetricMetadata"
+          ]
+          Effect   = "Allow"
+          Resource = "*"
+        },
+      ]
+    })
+  }
+
+  tags = local.tags
+}
