@@ -1,0 +1,17 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Federated": "arn:aws:iam::349361870252:oidc-provider/oidc.eks.us-east-1.amazonaws.com/id/9E3FA1AA4392DC629B05C120927613C9"
+      },
+      "Action": "sts:AssumeRoleWithWebIdentity",
+      "Condition": {
+        "StringEquals": {
+          "oidc.eks.us-east-1.amazonaws.com/id/9E3FA1AA4392DC629B05C120927613C9:sub": "system:serviceaccount:default:amp-iamproxy-query-service-account"
+        }
+      }
+    }
+  ]
+}

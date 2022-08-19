@@ -55,14 +55,7 @@ locals {
     insecure            = false # Set to true to disable the server's certificate verification
   }
 
-  #---------------------------------------------------------------
-  # ARGOCD WORKLOAD APPLICATION
-  #---------------------------------------------------------------
-  workload_application = {
-    path               = "envs/dev"
-    repo_url           = "https://github.com/aws-samples/eks-blueprints-workloads.git"
-    add_on_application = false
-  }
+
   
 }
 
@@ -96,40 +89,26 @@ module "eks_blueprints" {
       },
       {
           namespace = "prometheus"
-      }]
-
-      subnet_ids = module.vpc.private_subnets
-    }
-    # Providing compute for kube-system namespace where core addons reside
-    kube_system = {
-      fargate_profile_name = "kube-system"
-      fargate_profile_namespaces = [
-        {
-          namespace = "kube-system"
-      }]
-
-      subnet_ids = module.vpc.private_subnets
-    }
-    # Add additional profiles to suit your needs
-        # Providing compute for default namespace
-    testing = {
-      fargate_profile_name = "testing"
-      #additional_iam_policies = [aws_iam_policy.fluentbit_opensearch_access.arn]
-      fargate_profile_namespaces = [
-        {
-          namespace = "redis"
-      },     {
-          namespace = "mqtt"
-      },
-      {
+      },      {
           namespace = "testing"
       },
       {
           namespace = "grafana"
       }]
-      
+
       subnet_ids = module.vpc.private_subnets
     }
+    # Providing compute for kube-system namespace where core addons reside
+    # kube_system = {
+    #   fargate_profile_name = "kube-system"
+    #   fargate_profile_namespaces = [
+    #     {
+    #       namespace = "kube-system"
+    #   }]
+
+    #   subnet_ids = module.vpc.private_subnets
+    # }
+
     
     # gatekeeper-system = {
     #   fargate_profile_name = "gatekeeper-system"
@@ -149,7 +128,7 @@ module "eks_blueprints" {
       node_group_name = "managed-ondemand"
       instance_types  = ["m5.large"]
       subnet_ids      = module.vpc.private_subnets
-      desired_size    = 2      
+      desired_size    = 3      
     }
   }
     # List of map_roles
@@ -216,10 +195,10 @@ module "eks_blueprints_kubernetes_addons" {
 
   tags = local.tags
 
-  depends_on = [
-    module.eks_blueprints,
-    null_resource.remove_default_coredns_deployment
-  ]
+  # depends_on = [
+  #   module.eks_blueprints
+  # # null_resource.remove_default_coredns_deployment
+  # ]
 
   # depends_on = [
   #   # CoreDNS provided by EKS needs to be updated before applying self-managed CoreDNS Helm addon
@@ -271,22 +250,22 @@ locals {
 }
 
 # Separate resource so that this is only ever executed once
-resource "null_resource" "remove_default_coredns_deployment" {
-  triggers = {}
+# resource "null_resource" "remove_default_coredns_deployment" {
+#   triggers = {}
 
-  provisioner "local-exec" {
-    interpreter = ["/bin/bash", "-c"]
-    environment = {
-      KUBECONFIG = base64encode(local.kubeconfig)
-    }
+#   provisioner "local-exec" {
+#     interpreter = ["/bin/bash", "-c"]
+#     environment = {
+#       KUBECONFIG = base64encode(local.kubeconfig)
+#     }
 
-    # We are removing the deployment provided by the EKS service and replacing it through the self-managed CoreDNS Helm addon
-    # However, we are maintaing the existing kube-dns service and annotating it for Helm to assume control
-    command = <<-EOT
-      kubectl --namespace kube-system delete deployment coredns --kubeconfig <(echo $KUBECONFIG | base64 --decode)
-    EOT
-  }
-}
+#     # We are removing the deployment provided by the EKS service and replacing it through the self-managed CoreDNS Helm addon
+#     # However, we are maintaing the existing kube-dns service and annotating it for Helm to assume control
+#     command = <<-EOT
+#       kubectl --namespace kube-system delete deployment coredns --kubeconfig <(echo $KUBECONFIG | base64 --decode)
+#     EOT
+#   }
+# }
 
 # resource "null_resource" "modify_kube_dns" {
 #   triggers = {}
@@ -339,6 +318,22 @@ module "vpc" {
   default_route_table_tags      = { Name = "${local.name}-default" }
   manage_default_security_group = true
   default_security_group_tags   = { Name = "${local.name}-default" }
+
+
+  default_security_group_ingress = [
+    {
+      protocol    = -1
+      from_port   = 0
+      to_port     = 0
+      cidr_blocks = local.vpc_cidr
+      }]
+  default_security_group_egress = [
+    {
+      from_port   = 0
+      to_port     = 0
+      protocol    = -1
+      cidr_blocks = "0.0.0.0/0"
+  }]
 
   public_subnet_tags = {
     "kubernetes.io/cluster/${local.name}" = "shared"
