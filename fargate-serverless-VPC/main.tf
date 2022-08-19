@@ -131,17 +131,27 @@ module "eks_blueprints" {
       subnet_ids = module.vpc.private_subnets
     }
     
-    gatekeeper-system = {
-      fargate_profile_name = "gatekeeper-system"
-      fargate_profile_namespaces = [
-        {
-          namespace = "gatekeeper-system"
-      }]
+    # gatekeeper-system = {
+    #   fargate_profile_name = "gatekeeper-system"
+    #   fargate_profile_namespaces = [
+    #     {
+    #       namespace = "gatekeeper-system"
+    #   }]
 
-      subnet_ids = module.vpc.private_subnets
-    }
+    #   subnet_ids = module.vpc.private_subnets
+    # }
   }
   
+  
+  # EKS MANAGED NODE GROUPS
+  managed_node_groups = {
+    mg_4 = {
+      node_group_name = "managed-ondemand"
+      instance_types  = ["m5.large"]
+      subnet_ids      = module.vpc.private_subnets
+      desired_size    = 3      
+    }
+  }
     # List of map_roles
   map_roles          = [
     {
@@ -197,7 +207,7 @@ module "eks_blueprints_kubernetes_addons" {
   }
   
   enable_aws_load_balancer_controller = true
-
+  enable_amazon_eks_aws_ebs_csi_driver = true
   # Prometheus and Amazon Managed Prometheus integration
   #enable_prometheus                    = true # Deploys Prometheus server with remote write to AWS AMP Workspace
   #enable_amazon_prometheus             = true # Creates all the relevant IAM Roles for AMP
