@@ -217,7 +217,6 @@ module "eks_blueprints_kubernetes_addons" {
   tags = local.tags
 
   depends_on = [
-    module.eks_blueprints,
     null_resource.remove_default_coredns_deployment
   ]
 
@@ -339,6 +338,21 @@ module "vpc" {
   default_route_table_tags      = { Name = "${local.name}-default" }
   manage_default_security_group = true
   default_security_group_tags   = { Name = "${local.name}-default" }
+
+  default_security_group_ingress = [
+    {
+      protocol    = -1
+      from_port   = 0
+      to_port     = 0
+      cidr_blocks = local.vpc_cidr
+      }]
+  default_security_group_egress = [
+    {
+      from_port   = 0
+      to_port     = 0
+      protocol    = -1
+      cidr_blocks = "0.0.0.0/0"
+  }]
 
   public_subnet_tags = {
     "kubernetes.io/cluster/${local.name}" = "shared"
