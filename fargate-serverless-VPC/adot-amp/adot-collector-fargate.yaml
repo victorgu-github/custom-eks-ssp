@@ -4,7 +4,7 @@ metadata:
   name: adot-collector
   namespace: default
   annotations:
-    eks.amazonaws.com/role-arn: arn:aws:iam::349361870252:role/amp-iamproxy-ingest-role
+    eks.amazonaws.com/role-arn: arn:aws:iam::349361870252:role/aws011-preprod-test-eks-amp-ingest-irsa
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -33,10 +33,10 @@ data:
     exporters:
       awsprometheusremotewrite:
         # replace this with your endpoint, in double quotes:
-        endpoint: https://aps-workspaces.us-east-1.amazonaws.com/workspaces/ws-b1fe62a1-f64b-42b2-aa11-8248d9293d3d/api/v1/remote_write
+        endpoint: https://aps-workspaces.us-west-2.amazonaws.com/workspaces/ws-34f76531-d2b9-4deb-908a-6c0de0122e24/api/v1/remote_write
         aws_auth:
           # replace this with your region, in double quotes:
-          region: us-east-1
+          region: us-west-2
           service: "aps"
       logging:
         loglevel: debug
