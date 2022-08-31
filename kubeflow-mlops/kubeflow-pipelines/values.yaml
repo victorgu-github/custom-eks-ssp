@@ -1,0 +1,31 @@
+platform:
+  # -- Configures the target cloud, possible: `aws`, `gcp`
+  cloud: aws
+  managedStorage:
+    enabled: false
+    # -- Database name prefix for KFP
+    databaseNamePrefix: '{{ .Release.Name | replace "-" "_" | replace "." "_" }}'
+    # -- MySQL database host for KFP. For AWS, it should be a host of RDS. For GCP you need to leave it as mysql, as CloudSQL Proxy will be used.
+    dbHost: "kubeflow.cpghiqndmreq.us-east-2.rds.amazonaws.com"
+    # -- MySQL database port
+    dbPort: 3306
+    # -- MySQL database user
+    dbUsername: 'admin'
+    # -- MySQL database password
+    dbPassword: 'mypassword'
+    # -- Bucket (or Container for Azure) name for KFP artifacts. Works for S3, GCP and Azure (only bucket/container name, do not put `s3://`, `gcs://` or `wasb://` prefixes here!)
+    bucketName: "kubeflow-victor"
+    # -- Internal keys for MinIO
+    minioAccessKey: minio
+    # -- Internal keys for MinIO
+    minioSecretKey: minio123
+  aws:
+    # -- Region of the bucket used in `platform.managedStorage.bucketName`
+    bucketRegion: "us-east-2"
+  gcp:
+    # -- GCP Project ID
+    projectId: ""
+    # -- Fully qualified connection name to CloudSQL instance, e.g. my-gcp-project-id:europe-west1:my-sql-instance-name
+    cloudsqlInstanceConnectionName: ~
+    # -- Enable or disable proxy agent. Only disable for CI.
+    proxyEnabled: true
