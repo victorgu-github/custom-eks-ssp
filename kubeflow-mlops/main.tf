@@ -64,8 +64,8 @@ module "eks_blueprints" {
       node_group_name = "managed-ondemand"
       instance_types  = ["m5.large"]
       subnet_ids      =  module.vpc.private_subnets
-      desired_size    = 5     
-      max_size               = 5
+      desired_size    = 3     
+      max_size               = 3
       min_size               = 3
     }
   }
@@ -106,7 +106,7 @@ module "eks_blueprints_kubernetes_addons" {
   enable_aws_efs_csi_driver = true
   enable_amazon_eks_aws_ebs_csi_driver  = true
   enable_aws_load_balancer_controller = true
-  enable_kubeflow_pipeline             = true
+  //enable_kubeflow_pipeline             = true
   enable_cert_manager                 = false
   
   tags = local.tags
