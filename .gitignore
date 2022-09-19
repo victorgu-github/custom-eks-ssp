@@ -4,8 +4,8 @@ fargate-serverless-VPC/.terraform
 fargate-serverless-VPC/.terraform.lock.hcl
 fargate-serverless-VPC/terraform.tfstate
 fargate-serverless-VPC/terraform.tfstate.backup
-eks-fargate-only/.terraform.lock.hcl
-eks-fargate-only/.terraform
+eks-with-addon/.terraform.lock.hcl
+eks-with-addon/.terraform
 eks/.terraform.lock.hcl
 eks/.terraform
 add-ons/.terraform.lock.hcl
@@ -14,7 +14,3 @@ kubeflow-mlops/.terraform.lock.hcl
 kubeflow-mlops/.terraform
 kubeflow-mlops/terraform.tfstate
 kubeflow-mlops/terraform.tfstate.backup
-fargate-ec24db/.terraform
-fargate-ec24db/.terraform.lock.hcl
-fargate-ec24db/terraform.tfstate
-fargate-ec24db/terraform.tfstate.backup

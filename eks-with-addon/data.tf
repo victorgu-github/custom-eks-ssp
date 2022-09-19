@@ -16,22 +16,14 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-output "cluster_id" {
-  description = "The ID of the EKS Cluster"
-  value       = module.eks-blueprints.eks_cluster_id
+
+data "aws_availability_zones" "available" {}
+
+
+data "aws_eks_cluster_auth" "cluster" {
+  name = module.eks-blueprints.eks_cluster_id
 }
 
-# output "managed_node_group_iam_instance_profile_id" {
-#   description = ""
-#   value       = module.eks-blueprints.managed_node_group_iam_instance_profile_id[0]
-# }
-
-output "configure_kubectl" {
-  description = "Configure kubectl: make sure you're logged in with the correct AWS profile and run the following command to update your kubeconfig"
-  value       = module.eks-blueprints.configure_kubectl
+data "aws_eks_cluster" "cluster" {
+  name = module.eks-blueprints.eks_cluster_id
 }
-
-# output "AMP_endpoint" {
-#   description = "AMP_endpoint"
-#   value       = module.eks-blueprints.amazon_prometheus_workspace_endpoint
-# }

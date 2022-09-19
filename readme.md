@@ -19,8 +19,8 @@
  - create opensearch (VPC mode) in public subnet for next step
  - launch template for karpenter autoscalling (even optional for karpenter)
  - 
-2a. EKS fargate only
- - create a eks cluster with fargate onyl
+2a. EKS with addon
+ - create a eks cluster with fargate and managed node group
  - also includes add-ons
  - cannot use with eks folder together since they share the same VPC
 
@@ -68,6 +68,21 @@ need to modify backend.conf and base.tfvars in each subfolder and make sure the 
     2.3 Add-ons - Please refer to the [instructions](./add-ons/README.md) to deploy the add-ons to the private EKS cluster using GitOps.
       manually add cluster id, region and amp_endpoint
 
+
+## Destroy
+
+To teardown and remove the resources created in this example:
+
+```sh
+terraform destroy -target="module.eks_blueprints_kubernetes_addons" -var-file base.tfvars -auto-approve
+terraform destroy -target="module.eks_blueprints" -var-file base.tfvars -auto-approve
+terraform destroy -target="module.vpc" -var-file base.tfvars -auto-approve
+```
+
+Finally, destroy any additional resources that are not in the above modules
+
+```sh
+terraform destroy -auto-approve -var-file base.tfvars
 
 # known issues:
 1. affinity settings in some applications can only work on one node group. so better create node group with >3 nodes

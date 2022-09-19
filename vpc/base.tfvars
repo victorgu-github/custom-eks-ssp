@@ -1,5 +1,5 @@
-tenant      = "aws005"
-environment = "preprod"
+tenant      = "eks"
+environment = "shared"
 zone        = "test"
 region      = "us-west-2"
 

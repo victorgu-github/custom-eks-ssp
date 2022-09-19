@@ -19,22 +19,7 @@
 variable "cluster_version" {
   description = "Kubernetes `<major>.<minor>` version to use for the EKS cluster (i.e.: `1.21`)"
   type        = string
-  default     = "1.21"
-}
-
-variable "region" {
-  type        = string
-  description = "AWS region"
-}
-
-variable "tf_state_vpc_s3_bucket" {
-  type        = string
-  description = "Terraform state S3 Bucket Name"
-}
-
-variable "tf_state_vpc_s3_key" {
-  type        = string
-  description = "Terraform state S3 Key path"
+  default     = "1.23"
 }
 
 variable "cluster_name" {
@@ -42,20 +27,27 @@ variable "cluster_name" {
   description = ""
 }
 
-variable "tenant" {
+variable "region" {
   type        = string
-  description = "Account Name or unique account unique id e.g., apps or management or aws007"
+  description = ""
 }
 
-variable "environment" {
+
+variable "vpc_id" {
   type        = string
-  description = "Environment area, e.g. prod or preprod "
+  description = ""
 }
 
-variable "zone" {
-  type        = string
-  description = "zone, e.g. dev or qa or load or ops etc..."
+variable "private_subnet_ids" {
+  type        = list(string)
+  description = ""
 }
+
+variable "public_subnet_ids" {
+  type        = list(string)
+  description = ""
+}
+
 
 #-------------------------------
 # EKS Cluster Security Groups
@@ -72,39 +64,3 @@ variable "cluster_security_group_additional_rules" {
   default     = {}
 }
 
-variable "terraform_version" {
-  type        = string
-  default     = "Terraform"
-  description = "Terraform version"
-}
-
-variable "create_eks" {
-  type        = bool
-  default     = true
-  description = "Create EKS cluster"
-}
-
-variable "opensearch_dashboard_user" {
-  description = "OpenSearch dashboard user"
-  type        = string
-  default     = "victor"
-}
-
-variable "opensearch_dashboard_pw" {
-  description = "OpenSearch dashboard user password"
-  type        = string
-  default     = "Victor123!"
-  sensitive   = true
-}
-
-variable "opensearch_cidr" {
-  description = ""
-  type        = string
-  default     = null
-}
-
-variable "create_iam_service_linked_role" {
-  description = "Whether to create the AWSServiceRoleForAmazonElasticsearchService role used by the OpenSearch service"
-  type        = bool
-  default     = true
-}

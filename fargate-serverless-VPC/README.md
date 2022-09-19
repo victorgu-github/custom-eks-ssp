@@ -75,13 +75,13 @@ kube-system   coredns-dcc8d4c97-2jvfb   1/1     Running   0          2m28s
 To teardown and remove the resources created in this example:
 
 ```sh
-terraform destroy -target="module.eks_blueprints_kubernetes_addons" -auto-approve
-terraform destroy -target="module.eks_blueprints" -auto-approve
-terraform destroy -target="module.vpc" -auto-approve
+terraform destroy -target="module.eks_blueprints_kubernetes_addons" -var-file base.tfvars -auto-approve
+terraform destroy -target="module.eks_blueprints" -var-file base.tfvars -auto-approve
+terraform destroy -target="module.vpc" -var-file base.tfvars -auto-approve
 ```
 
 Finally, destroy any additional resources that are not in the above modules
 
 ```sh
-terraform destroy -auto-approve
+terraform destroy -auto-approve -var-file base.tfvars
 ```
