@@ -159,7 +159,7 @@ module "eks_blueprints_kubernetes_addons" {
   # Add-ons
   enable_aws_load_balancer_controller = true
   enable_metrics_server               = true
-    
+  enable_cluster_autoscaler           = true  
     
     
   # Prometheus and Amazon Managed Prometheus integration
@@ -167,7 +167,9 @@ module "eks_blueprints_kubernetes_addons" {
   enable_amazon_prometheus             = true # need repeat here for creating irsa and pass it to prometheus
   amazon_prometheus_workspace_endpoint = aws_prometheus_workspace.amp.prometheus_endpoint
 
-
+  depends_on = [
+    module.eks-blueprints
+  ]
   tags = local.tags
 
 }
