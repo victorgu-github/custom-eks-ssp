@@ -1,0 +1,25 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-nginx
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internal
+    alb.ingress.kubernetes.io/target-type: ip
+    # alb.ingress.kubernetes.io/conditions.service-2048: >
+    #   [{"field":"http-header","httpHeaderConfig":{"httpHeaderName": "HeaderName", "values":["app2"]}}]
+spec:
+  ingressClassName: alb
+  rules:
+    - host: nginx-ingress.victor-demo.private.com
+      http:
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: nginx # deploy in test-service.yaml
+              port:
+                number: 80
+
+        
