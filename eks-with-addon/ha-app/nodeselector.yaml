@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+ name: node-ns
+ annotations:
+   scheduler.alpha.kubernetes.io/node-selector: cost=high
+spec: {}
+status: {}
+
+# this requires enabling PodNodeSelector in admission controller which is alpha feature in k8s. so doesn't support by EKS.
+# have to use nodeselector on pod level
+# you can use gatekeeper to enable nodeSelector with certain label in certain ns as alternative 
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels:
+    env: test
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+    imagePullPolicy: IfNotPresent
+  nodeSelector:
+    cost: high
