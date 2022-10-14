@@ -54,6 +54,7 @@ Enter `yes` to apply.
 
 **Deploy kubeflow**
 ```sh
+unzip kubeflow-manifests.zip
 cd kubeflow-manifests
 while ! kustomize build deployments/vanilla | kubectl apply -f -; do echo "Retrying to apply resources"; sleep 30; done
 ```
