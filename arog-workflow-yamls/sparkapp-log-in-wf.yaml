@@ -1,0 +1,49 @@
+# This example demonstrates how to include and obtain logs from pods created by a
+# custom resource submitted via resource template. Note that this feature is only
+# available in v3.3 and above.
+#
+# This is particularly useful since Argo Workflows does not know how
+# other CRDs (Kubeflow training CRDs, Spark application CRD, etc.) work
+# and thus could not pull the logs from the pods created by those CRDs.
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: k8s-jobs-log-selector-
+  namespace: argo-workflows
+spec:
+  entrypoint: sparkling-operator
+  templates:
+  - name: spark-groupby
+    resource:
+      action: create
+      manifest: |
+        apiVersion: "sparkoperator.k8s.io/v1beta2"
+        kind: SparkApplication
+        metadata:
+          generateName: sparkop-argo-groupby-
+        spec:
+          type: Scala
+          mode: cluster
+          image: gcr.io/spark-operator/spark:v3.1.1
+          imagePullPolicy: Always
+          mainClass: org.apache.spark.examples.GroupByTest
+          mainApplicationFile:  local:///opt/spark/spark-examples_2.12-3.1.1-hadoop-2.7.jar
+          sparkVersion: "3.1.1"
+          driver:
+            cores: 1
+            coreLimit: "1200m"
+            memory: "512m"
+            serviceAccount: default
+            labels:
+              workflows.argoproj.io/workflow: {{workflow.name}}
+          executor:
+            cores: 1
+            instances: 1
+            memory: "512m"
+            labels:
+              workflows.argoproj.io/workflow: {{workflow.name}}
+  - name: sparkling-operator
+    dag:
+      tasks:
+      - name: SparkGroupBY
+        template: spark-groupby

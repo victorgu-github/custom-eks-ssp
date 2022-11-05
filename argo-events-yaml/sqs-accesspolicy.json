@@ -1,0 +1,3 @@
+{
+    "Policy": "{\"Version\": \"2012-10-17\",\"Statement\": [{\"Action\": \"sqs:*\",\"Effect\": \"Allow\",\"Resource\": \"arn:aws:sqs:us-east-1:349361870252:test2\",\"Principal\": {\"AWS\": \"arn:aws:iam::349361870252:role/argoworkflows-events-eks-event-sa-irsa\"}}]}"
+}

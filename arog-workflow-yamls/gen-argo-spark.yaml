@@ -16,7 +16,7 @@ spec:
             "/bin/sh",
             "-c",
             "/opt/spark/bin/spark-submit \
-            --master k8s://https://E428E95793FEFE4880A262A2F9DA10BF.gr7.us-east-1.eks.amazonaws.com \
+            --master k8s://https://A3DFB86C71D44371093BA309B3DCD8DC.gr7.us-west-2.eks.amazonaws.com \
             --deploy-mode cluster \
             --name sparkapp \
             --class org.apache.spark.examples.SparkPi \
